@@ -44,6 +44,7 @@
 
     <templateFile condition="$PLASTER_PARAM_VSCode -eq 'Yes'" source='..\editor\VSCode\tasks.json' destination='.vscode\tasks.json' />
     <file condition="$PLASTER_PARAM_VSCode -eq 'Yes'" source='..\editor\VSCode\extensions.json' destination='.vscode\extensions.json' />
+    <file condition="$PLASTER_PARAM_VSCode -eq 'Yes'" source='..\editor\VSCode\launch.json' destination='.vscode\launch.json' />
     <templateFile condition="$PLASTER_PARAM_VSCode -eq 'Yes'" source='..\editor\VSCode\settings.json' destination='.vscode\settings.json' />
 
     <templateFile condition="$PLASTER_PARAM_Pester -eq '4'" source='..\Module\src\Tests\v4\Unit\PSModule-Module.Tests.ps1' destination='src\Tests\Unit\${PLASTER_PARAM_ModuleName}-Module.Tests.ps1' />
