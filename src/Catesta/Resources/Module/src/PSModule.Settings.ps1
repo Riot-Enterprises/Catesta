@@ -2,7 +2,7 @@
 [int]$script:requiredPSVersion = '5'
 Add-BuildTask PostInit -After Init {
     $ProjectName = $script:ModuleName
-    $Repo = Get-GitHubRepository -OrganizationName 'Riot-Enterprises' -RepositoryName $ProjectName
+    $Repo = Get-GitHubRepository -RepositoryName $ProjectName
     $HashArguments = @{
         OwnerName      = $Repo.owner.UserName
         RepositoryName = $Repo.name
