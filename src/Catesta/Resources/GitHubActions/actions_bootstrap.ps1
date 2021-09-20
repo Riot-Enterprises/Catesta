@@ -47,6 +47,12 @@ $null = $modulesToInstall.Add(([PSCustomObject]@{
             ModuleVersion = '0.12.0'
         }))
 
+# https://github.com/RamblingCookieMonster/BuildHelpers
+$null = $modulesToInstall.Add(([PSCustomObject]@{
+    ModuleName    = 'BuildHelpers'
+    ModuleVersion = '2.0.16'
+}))
+
 <%
 If ($PLASTER_PARAM_VAULT -eq 'VAULT') {
     @'
