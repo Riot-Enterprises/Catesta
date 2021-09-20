@@ -1,6 +1,7 @@
 # specify the minumum required major PowerShell version that the build script should validate
 [int]$script:requiredPSVersion = '5'
 Add-BuildTask PostInit -After Init {
+    $ProjectRoot = Split-Path -Path $BuildRoot -Parent
     $ProjectName = $script:ModuleName
     $Repo = Get-GitHubRepository -RepositoryName $ProjectName
     $HashArguments = @{
