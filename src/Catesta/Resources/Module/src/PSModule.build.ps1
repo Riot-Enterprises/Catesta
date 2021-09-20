@@ -166,6 +166,25 @@ Add-BuildTask ImportModuleManifest {
     }
     Write-Build Green "      ...$script:ModuleName imported successfully"
 }
+Add-BuildTask Init {
+    Write-Build White '      Initialising Repository'
+    $ProjectRoot = Split-Path -Path $BuildRoot -Parent
+    $ProjectName = $script:ModuleName
+    Push-Location $ProjectRoot
+    $Repo = New-GitHubRepository -OrganizationName 'Riot-Enterprises' -RepositoryName $ProjectName
+    if (!(Test-Path README.md)){
+        Set-Content -Path README.md -Value "# $ProjectName"
+    }
+    git init
+    git add README.md
+    git commit -m "Initial commit"
+    git branch -M main
+    git remote add origin $repo.clone_url
+    git push -u origin main
+    git checkout -b Initial_Template
+    Pop-Location
+    Write-Build Green "      ...Repository initialiased successfully"
+}
 
 #Synopsis: Clean and reset Artifacts/Archive Directory
 Add-BuildTask Clean {
