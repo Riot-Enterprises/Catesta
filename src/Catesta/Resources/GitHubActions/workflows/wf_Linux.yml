@@ -8,7 +8,7 @@ name: ActionsTest-Linux-Build
 on: [push, pull_request]
 jobs:
   test:
-    name: Run Tests
+    name: Run Tests ubuntu-latest pwsh
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
