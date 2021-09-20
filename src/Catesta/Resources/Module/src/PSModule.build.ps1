@@ -99,22 +99,22 @@ Enter-Build {
     # Ensure our builds fail until if below a minimum defined code test coverage threshold
     $script:coverageThreshold = 30
 
-    <%
-    If ($PLASTER_PARAM_Pester -eq '4') {
+<%
+If ($PLASTER_PARAM_Pester-eq '4') {
         @'
     [version]$script:MinPesterVersion = '4.0.0'
     [version]$script:MaxPesterVersion = '4.99.99'
 '@
-    }
-    %>
-    <%
-    If ($PLASTER_PARAM_Pester -eq '5') {
+}
+%>
+<%
+If ($PLASTER_PARAM_Pester-eq '5') {
         @'
     [version]$script:MinPesterVersion = '5.2.2'
     [version]$script:MaxPesterVersion = '5.99.99'
 '@
-    }
-    %>
+}
+%>
 } #Enter-Build
 
 # Define headers as separator, task path, synopsis, and location, e.g. for Ctrl+Click in VSCode.
@@ -166,38 +166,6 @@ Add-BuildTask ImportModuleManifest {
     }
     Write-Build Green "      ...$script:ModuleName imported successfully"
 }
-Add-BuildTask Init {
-    Write-Build White '      Initialising Repository'
-    $ProjectRoot = Split-Path -Path $BuildRoot -Parent
-    $ProjectName = $script:ModuleName
-    Push-Location $ProjectRoot
-    $Repo = New-GitHubRepository -OrganizationName 'Riot-Enterprises' -RepositoryName $ProjectName
-    if (!(Test-Path README.md)) {
-        Set-Content -Path README.md -Value "# $ProjectName"
-    }
-    git init
-    git add README.md
-    git commit -m "Initial commit"
-    git branch -M main
-    git remote add origin $repo.clone_url
-    git push -u origin main
-    git checkout -b Initial_Template
-    Pop-Location
-    Write-Build Green "      ...Repository initialiased successfully"
-    $HashArguments = @{
-        OwnerName      = $Repo.owner.UserName
-        RepositoryName = $Repo.name
-        BranchName     = 'main'
-    }
-    $StatusChecks = Get-ChildItem (Join-Path $ProjectRoot '.github/workflows/*.yml') |
-    Select-String '(?:name:\s+?)(Run Test.*?$)' |
-    Select-Object -ExpandProperty matches |
-    Select-Object -ExpandProperty Groups |
-    Where-Object name -eq  1 |
-    Select-Object -ExpandProperty Value
-    New-GitHubRepositoryBranchProtectionRule @HashArguments -StatusChecks $StatusChecks -EnforceAdmins
-
-}
 
 #Synopsis: Clean and reset Artifacts/Archive Directory
 Add-BuildTask Clean {
@@ -237,8 +205,8 @@ Add-BuildTask Analyze {
 Add-BuildTask AnalyzeTests -After Analyze {
     if (Test-Path -Path $script:TestsPath) {
 
-        <%
-        If ($PLASTER_PARAM_Pester -eq '4') {
+<%
+If ($PLASTER_PARAM_Pester-eq '4') {
             @'
         $scriptAnalyzerParams = @{
             Path    = $script:TestsPath
@@ -247,10 +215,10 @@ Add-BuildTask AnalyzeTests -After Analyze {
             Verbose = $false
         }
 '@
-        }
-        %>
-        <%
-        If ($PLASTER_PARAM_Pester -eq '5') {
+}
+%>
+<%
+If ($PLASTER_PARAM_Pester-eq '5') {
             @'
         $scriptAnalyzerParams = @{
             Path        = $script:TestsPath
@@ -260,8 +228,8 @@ Add-BuildTask AnalyzeTests -After Analyze {
             Verbose     = $false
         }
 '@
-        }
-        %>
+}
+%>
 
         Write-Build White '      Performing Test ScriptAnalyzer checks...'
         $scriptAnalyzerResults = Invoke-ScriptAnalyzer @scriptAnalyzerParams
@@ -279,7 +247,7 @@ Add-BuildTask AnalyzeTests -After Analyze {
 #Synopsis: Analyze scripts to verify if they adhere to desired coding format (Stroustrup / OTBS / Allman)
 Add-BuildTask FormattingCheck {
 
-    <%
+<%
     if ($PLASTER_PARAM_CodingStyle -eq 'Stroustrup') {
         @'
     $scriptAnalyzerParams = @{
@@ -290,8 +258,8 @@ Add-BuildTask FormattingCheck {
     }
 '@
     }
-    %>
-    <%
+%>
+<%
     if ($PLASTER_PARAM_CodingStyle -eq 'OTBS') {
         @'
     $scriptAnalyzerParams = @{
@@ -302,8 +270,8 @@ Add-BuildTask FormattingCheck {
     }
 '@
     }
-    %>
-    <%
+%>
+<%
     if ($PLASTER_PARAM_CodingStyle -eq 'Allman') {
         @'
     $scriptAnalyzerParams = @{
@@ -314,7 +282,7 @@ Add-BuildTask FormattingCheck {
     }
 '@
     }
-    %>
+%>
 
     Write-Build White '      Performing script formatting checks...'
     $scriptAnalyzerResults = Get-ChildItem -Path $script:ModuleSourcePath -Exclude "*.psd1" | Invoke-ScriptAnalyzer @scriptAnalyzerParams
@@ -344,8 +312,8 @@ Add-BuildTask Test {
         New-Item -Path $testOutPutPath -ItemType Directory | Out-Null
     }
     if (Test-Path -Path $script:UnitTestsPath) {
-        <%
-        If ($PLASTER_PARAM_Pester -eq '4') {
+<%
+If ($PLASTER_PARAM_Pester-eq '4') {
             @'
         $invokePesterParams = @{
             Path                         = 'Tests\Unit'
@@ -364,10 +332,10 @@ Add-BuildTask Test {
         # Publish Test Results as NUnitXml
         $testResults = Invoke-Pester @invokePesterParams
 '@
-        }
-        %>
-        <%
-        If ($PLASTER_PARAM_Pester -eq '5') {
+}
+%>
+<%
+If ($PLASTER_PARAM_Pester-eq '5') {
             @'
         $pesterConfiguration = [PesterConfiguration]::new()
         $pesterConfiguration.run.Path = $script:TestsPath
@@ -387,8 +355,8 @@ Add-BuildTask Test {
         # Publish Test Results as NUnitXml
         $testResults = Invoke-Pester -Configuration $pesterConfiguration
 '@
-        }
-        %>
+}
+%>
 
         # This will output a nice json for each failed test (if running in CodeBuild)
         if ($env:CODEBUILD_BUILD_ARN) {
@@ -402,8 +370,8 @@ Add-BuildTask Test {
         $numberFails = $testResults.FailedCount
         Assert-Build($numberFails -eq 0) ('Failed "{0}" unit tests.' -f $numberFails)
 
-        <%
-        If ($PLASTER_PARAM_Pester -eq '4') {
+<%
+If ($PLASTER_PARAM_Pester-eq '4') {
             @'
         Write-Build Gray ('      ...CODE COVERAGE - NumberOfCommandsExecuted: {0}' -f $testResults.CodeCoverage.NumberOfCommandsExecuted)
         Write-Build Gray ('      ...CODE COVERAGE - NumberOfCommandsAnalyzed: {0}' -f $testResults.CodeCoverage.NumberOfCommandsAnalyzed)
@@ -430,10 +398,10 @@ Add-BuildTask Test {
             Write-Build Yellow '      Code coverage check skipped. No commands to execute...'
         }
 '@
-        }
-        %>
-        <%
-        If ($PLASTER_PARAM_Pester -eq '5') {
+}
+%>
+<%
+If ($PLASTER_PARAM_Pester-eq '5') {
             @'
         Write-Build Gray ('      ...CODE COVERAGE - CommandsExecutedCount: {0}' -f $testResults.CodeCoverage.CommandsExecutedCount)
         Write-Build Gray ('      ...CODE COVERAGE - CommandsAnalyzedCount: {0}' -f $testResults.CodeCoverage.CommandsAnalyzedCount)
@@ -460,8 +428,8 @@ Add-BuildTask Test {
             Write-Build Yellow '      Code coverage check skipped. No commands to execute...'
         }
 '@
-        }
-        %>
+}
+%>
 
     }
 } #Test
@@ -472,8 +440,8 @@ Add-BuildTask DevCC {
     Write-Build White "      Importing desired Pester version. Min: $script:MinPesterVersion Max: $script:MaxPesterVersion"
     Remove-Module -Name Pester -Force -ErrorAction SilentlyContinue # there are instances where some containers have Pester already in the session
     Import-Module -Name Pester -MinimumVersion $script:MinPesterVersion -MaximumVersion $script:MaxPesterVersion -ErrorAction 'Stop'
-    <%
-    If ($PLASTER_PARAM_Pester -eq '4') {
+<%
+If ($PLASTER_PARAM_Pester-eq '4') {
         @'
     $invokePesterParams = @{
         Path                   = 'Tests\Unit'
@@ -482,10 +450,10 @@ Add-BuildTask DevCC {
     }
     Invoke-Pester @invokePesterParams
 '@
-    }
-    %>
-    <%
-    If ($PLASTER_PARAM_Pester -eq '5') {
+}
+%>
+<%
+If ($PLASTER_PARAM_Pester-eq '5') {
         @'
     $pesterConfiguration = [PesterConfiguration]::new()
     $pesterConfiguration.run.Path = 'Tests\Unit'
@@ -497,8 +465,8 @@ Add-BuildTask DevCC {
 
     Invoke-Pester -Configuration $pesterConfiguration
 '@
-    }
-    %>
+}
+%>
     Write-Build Green '      ...Code Coverage report generated!'
 } #DevCC
 
@@ -687,8 +655,8 @@ Add-BuildTask InfraTest {
 
         Write-Build White "      Performing Pester Infrastructure Tests in $($invokePesterParams.path)"
 
-        <%
-        If ($PLASTER_PARAM_Pester -eq '4') {
+<%
+If ($PLASTER_PARAM_Pester-eq '4') {
             @'
         $invokePesterParams = @{
             Path       = 'Tests\Infrastructure'
@@ -702,10 +670,10 @@ Add-BuildTask InfraTest {
         # Publish Test Results as NUnitXml
         $testResults = Invoke-Pester @invokePesterParams
 '@
-        }
-        %>
-        <%
-        If ($PLASTER_PARAM_Pester -eq '5') {
+}
+%>
+<%
+If ($PLASTER_PARAM_Pester-eq '5') {
             @'
         $pesterConfiguration = [PesterConfiguration]::new()
         $pesterConfiguration.run.Path = 'Tests\Infrastructure'
@@ -717,8 +685,8 @@ Add-BuildTask InfraTest {
 
         $testResults = Invoke-Pester -Configuration $pesterConfiguration
 '@
-        }
-        %>
+}
+%>
         # This will output a nice json for each failed test (if running in CodeBuild)
         if ($env:CODEBUILD_BUILD_ARN) {
             $testResults.TestResult | ForEach-Object {
