@@ -142,6 +142,10 @@ function New-PowerShellProject {
 
                 $results = Invoke-Plaster @invokePlasterSplat
                 Write-Verbose -Message 'Template Deployed.'
+                $BuildFile = Get-ChildItem -Path $DestinationPath -Recurse -Include '*.build.ps1'
+                if ($BuildFile){
+                    Invoke-Build -Task 'Init' -File $BuildFile.FullName
+                }
             }
             catch {
                 Write-Error $_
