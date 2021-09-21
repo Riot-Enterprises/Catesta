@@ -59,12 +59,15 @@ Add-BuildTask Init {
         Set-Content -Path README.md -Value "# $ProjectName"
     }
     git init
-    git add README.md
-    git commit -m "Initial commit"
+    git add .
+    git reset -- src/*
+    git commit -m "Initial commit infrastructure"
     git branch -M main
     git remote add origin $repo.clone_url
     git push -u origin main
     git checkout -b Initial_Template
+    git add .
+    git commit -m "Feat(Module): :tada: Create Module from Template"
     Pop-Location
     Write-Build Green "      ...Repository initialiased successfully"
 }
