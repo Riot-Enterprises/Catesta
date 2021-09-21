@@ -61,13 +61,13 @@ Add-BuildTask Init {
     git init
     git add .
     git reset -- src/*
-    git commit -m "Initial commit infrastructure"
+    git commit -m "Feat(Envirnment): :wrench: Initial commit infrastructure" --author 'Automation <auto@madspaniels.co.uk>'
     git branch -M main
     git remote add origin $repo.clone_url
     git push -u origin main
     git checkout -b Initial_Template
     git add .
-    git commit -m "Feat(Module): :tada: Create Module from Template"
+    git commit -m "Feat(Module): :tada: Create Module from Template" --author 'Automation <auto@madspaniels.co.uk>'
     Pop-Location
     Write-Build Green "      ...Repository initialiased successfully"
 }
